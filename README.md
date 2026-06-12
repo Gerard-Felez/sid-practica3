@@ -155,6 +155,20 @@ exp_config = {
 
 ---
 
+# Ampliación — JAL-GT con Memoria
+
+Como extensión, comparamos la representación del estado del código base con una nueva
+representación que además incluye admás 5 bits que codifican la dirección de donde viene el agente.
+
+```bash
+python mainMemory.py
+```
+
+Los resultados se guardan en `plots/`. La justificación y análisis están en
+la documentación de ampliación.
+
+---
+
 # Ampliación — JAL-GT vs WoLF-PHC
 
 Como extensión, comparamos JAL-GT (Pareto) frente a WoLF-PHC sobre distintos
