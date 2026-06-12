@@ -1,13 +1,13 @@
 import os
 from tqdm import tqdm
-from src.algorithms import JALGT
-from src.solution_concepts import MinimaxSolutionConcept, ParetoSolutionConcept, NashSolutionConcept, WelfareSolutionConcept
-from src.game_model import GameModel
+from algorithms import JALGT
+from solution_concepts import MinimaxSolutionConcept, ParetoSolutionConcept, NashSolutionConcept, WelfareSolutionConcept
+from game_model import GameModel
 import numpy as np
 from gymnasium import Wrapper
 from pogema import pogema_v0, GridConfig
 from pogema.animation import AnimationMonitor, AnimationConfig
-from src.utils import draw_history
+from utils import draw_history
 
 
 def obs_to_state(obs):

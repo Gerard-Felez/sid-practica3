@@ -2,8 +2,8 @@ import random
 
 import numpy as np
 
-from src.solution_concepts import SolutionConcept
-from src.game_model import GameModel
+from solution_concepts import SolutionConcept
+from game_model import GameModel
 import abc
 
 
