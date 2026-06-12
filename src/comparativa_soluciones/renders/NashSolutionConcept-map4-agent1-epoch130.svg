@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+             width="70" height="70" viewBox="0 -700 700 700">
+
+<defs>
+
+</defs>
+
+<line stroke="#84A1AE" stroke-width="6.0" x1="-50.0" x2="-50.0" y1="0" y2="-700" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="50.0" x2="50.0" y1="0" y2="-700" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="150.0" x2="150.0" y1="0" y2="-700" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="250.0" x2="250.0" y1="0" y2="-700" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="350.0" x2="350.0" y1="0" y2="-700" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="450.0" x2="450.0" y1="0" y2="-700" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="550.0" x2="550.0" y1="0" y2="-700" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="650.0" x2="650.0" y1="0" y2="-700" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="0" x2="700" y1="50.0" y2="50.0" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="0" x2="700" y1="-50.0" y2="-50.0" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="0" x2="700" y1="-150.0" y2="-150.0" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="0" x2="700" y1="-250.0" y2="-250.0" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="0" x2="700" y1="-350.0" y2="-350.0" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="0" x2="700" y1="-450.0" y2="-450.0" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="0" x2="700" y1="-550.0" y2="-550.0" />
+<line stroke="#84A1AE" stroke-width="6.0" x1="0" x2="700" y1="-650.0" y2="-650.0" />
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="65" y="-135"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="65" y="-235"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="65" y="-335"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="65" y="-435"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="65" y="-535"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="65" y="-635"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="165" y="-135"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="165" y="-535"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="165" y="-635"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="265" y="-135"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="265" y="-635"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="365" y="-135"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;0.6666666667;1.0" repeatCount="indefinite" values="0.2;0.2;1.0;1.0"/> </rect>
+<rect fill="#84A1AE" height="70" rx="15" width="70" x="365" y="-235"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="1.0;1.0;1.0"/> </rect>
+<rect fill="#84A1AE" height="70" rx="15" width="70" x="365" y="-335"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="1.0;1.0;1.0"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="365" y="-535"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="365" y="-635"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="465" y="-135"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;0.6666666667;1.0" repeatCount="indefinite" values="0.2;0.2;1.0;1.0"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="465" y="-635"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="565" y="-135"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;0.6666666667;1.0" repeatCount="indefinite" values="0.2;0.2;1.0;1.0"/> </rect>
+<rect fill="#84A1AE" height="70" rx="15" width="70" x="565" y="-235"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="1.0;1.0;1.0"/> </rect>
+<rect fill="#84A1AE" height="70" rx="15" width="70" x="565" y="-335"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="1.0;1.0;1.0"/> </rect>
+<rect fill="#84A1AE" height="70" rx="15" width="70" x="565" y="-435"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="1.0;1.0;1.0"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="565" y="-535"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<rect fill="#84A1AE" height="70" opacity="0.2" rx="15" width="70" x="565" y="-635"> <animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="0.2;0.2;0.2"/> </rect>
+<circle cx="500" cy="-500" fill="#72D5C8" opacity="0.2" r="35"> <animate attributeName="cy" dur="0.56s" keyTimes="0.0;0.3333333333;0.6666666667;1.0" repeatCount="indefinite" values="-500;-500;-400;-400"/>
+<animate attributeName="cx" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="500;500;500"/>
+<animate attributeName="visibility" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="visible;visible;visible"/>
+<animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="1.0;1.0;1.0"/> </circle>
+<circle cx="500" cy="-300" fill="#c1433c" r="35"> <animate attributeName="cy" dur="0.56s" keyTimes="0.0;0.3333333333;0.6666666667;1.0" repeatCount="indefinite" values="-300;-300;-200;-200"/>
+<animate attributeName="cx" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="500;500;500"/>
+<animate attributeName="visibility" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="visible;visible;visible"/>
+<animate attributeName="opacity" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="1.0;1.0;1.0"/> </circle>
+<circle cx="200" cy="-400" fill="none" r="35" stroke="#c1433c" stroke-width="10"> <animate attributeName="visibility" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<rect fill="none" height="290" rx="15" stroke="#c1433c" stroke-dasharray="25" stroke-width="10" width="290" x="355" y="-445"> <animate attributeName="x" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="355;355;355"/>
+<animate attributeName="y" dur="0.56s" keyTimes="0.0;0.3333333333;0.6666666667;1.0" repeatCount="indefinite" values="-445;-445;-345;-345"/>
+<animate attributeName="visibility" dur="0.56s" keyTimes="0.0;0.3333333333;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </rect>
+</svg>
