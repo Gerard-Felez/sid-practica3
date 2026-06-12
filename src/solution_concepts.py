@@ -1,6 +1,6 @@
 import random
 
-from src.game_model import GameModel
+from game_model import GameModel
 import abc
 import functools
 import itertools

@@ -6,3 +6,4 @@ pogema==1.2.2
 seaborn
 tqdm
 jupyter
+tinynn

@@ -1,0 +1,421 @@
+import os
+from tqdm import tqdm
+from algorithms import JALGT
+from solution_concepts import MinimaxSolutionConcept, ParetoSolutionConcept, NashSolutionConcept, WelfareSolutionConcept
+from game_model import GameModel
+import numpy as np
+from gymnasium import Wrapper
+import matplotlib.pyplot as plt
+from pogema import pogema_v0, GridConfig
+from pogema.animation import AnimationMonitor, AnimationConfig
+from utils import draw_history
+
+
+
+def obs_to_state_with_memory(obs, last_action = 0):
+    # Esta representación base asume observaciones de radio 1 (matrices 3x3).
+    # Está pensada para el alcance obligatorio de la práctica; podéis cambiarla
+    # si queréis experimentar con estados más complejos.
+    matrix_obstacles = obs[0]
+    matrix_agents = obs[1]
+    matrix_target = obs[2]
+
+    action = last_action * 2**10
+    # Representación del objetivo:
+    #  Ocupa 2 bits
+    #  0 si el objetivo está arriba, diagonal arriba-izquierda o diagonal arriba-derecha
+    #  1 si el objetivo está abajo, diagonal abajo-izquierda o diagonal abajo-derecha
+    #  2 si el objetivo está a la izquierda (no en diagonal)
+    #  3 si el objetivo está a la derecha (no en diagonal)
+    target = np.max(matrix_target[2]) * 1 + \
+             matrix_target[1][0] * 2 + matrix_target[1][2] * 3
+
+    # Representación de los obstáculos:
+    #  Shift de 2^6, ocupando 4 bits
+    #  2^9 si hay un obstáculo arriba (no diagonal)
+    #  2^8 si hay un obstáculo a la izquierda (no diagonal)
+    #  2^7 si hay un obstáculo a la derecha (no diagonal)
+    #  2^6 si hay un obstáculo abajo (no diagonal)
+    obstacles = matrix_obstacles[0][1] * 2 ** 9 + \
+                matrix_obstacles[1][0] * 2 ** 8 + \
+                matrix_obstacles[1][2] * 2 ** 7 + \
+                matrix_obstacles[2][1] * 2 ** 6
+
+    # Representación de los otros agentes:
+    #  Shift de 2^2, ocupando 4 bits
+    #  2^5 si hay un agente arriba (no diagonal)
+    #  2^4 si hay un agente a la izquierda (no diagonal)
+    #  2^3 si hay un agente a la derecha (no diagonal)
+    #  2^2 si hay un agente abajo (no diagonal)
+    agents = matrix_agents[0][1] * 2 ** 5 + \
+             matrix_agents[1][0] * 2 ** 4 + \
+             matrix_agents[1][2] * 2 ** 3 + \
+             matrix_agents[2][1] * 2 ** 2
+
+    return int(obstacles + agents + target + action)
+
+def obs_to_state(obs):
+    # Esta representación base asume observaciones de radio 1 (matrices 3x3).
+    # Está pensada para el alcance obligatorio de la práctica; podéis cambiarla
+    # si queréis experimentar con estados más complejos.
+    matrix_obstacles = obs[0]
+    matrix_agents = obs[1]
+    matrix_target = obs[2]
+
+    # Representación del objetivo:
+    #  Ocupa 2 bits
+    #  0 si el objetivo está arriba, diagonal arriba-izquierda o diagonal arriba-derecha
+    #  1 si el objetivo está abajo, diagonal abajo-izquierda o diagonal abajo-derecha
+    #  2 si el objetivo está a la izquierda (no en diagonal)
+    #  3 si el objetivo está a la derecha (no en diagonal)
+    target = np.max(matrix_target[2]) * 1 + \
+             matrix_target[1][0] * 2 + matrix_target[1][2] * 3
+
+    # Representación de los obstáculos:
+    #  Shift de 2^6, ocupando 4 bits
+    #  2^9 si hay un obstáculo arriba (no diagonal)
+    #  2^8 si hay un obstáculo a la izquierda (no diagonal)
+    #  2^7 si hay un obstáculo a la derecha (no diagonal)
+    #  2^6 si hay un obstáculo abajo (no diagonal)
+    obstacles = matrix_obstacles[0][1] * 2 ** 9 + \
+                matrix_obstacles[1][0] * 2 ** 8 + \
+                matrix_obstacles[1][2] * 2 ** 7 + \
+                matrix_obstacles[2][1] * 2 ** 6
+
+    # Representación de los otros agentes:
+    #  Shift de 2^2, ocupando 4 bits
+    #  2^5 si hay un agente arriba (no diagonal)
+    #  2^4 si hay un agente a la izquierda (no diagonal)
+    #  2^3 si hay un agente a la derecha (no diagonal)
+    #  2^2 si hay un agente abajo (no diagonal)
+    agents = matrix_agents[0][1] * 2 ** 5 + \
+             matrix_agents[1][0] * 2 ** 4 + \
+             matrix_agents[1][2] * 2 ** 3 + \
+             matrix_agents[2][1] * 2 ** 2
+
+    return int(obstacles + agents + target)
+
+
+class RewardWrapper(Wrapper):
+    def __init__(self, env):
+        super().__init__(env)
+
+    def step(self, joint_action):
+        observations, rewards, terminated, truncated, infos = self.env.step(joint_action)
+        for i in range(len(joint_action)):
+            if not terminated[i] and not truncated[i]:
+                if rewards[i] == 0:  # Penalización por tardar más en llegar
+                    rewards[i] = rewards[i] - 0.01
+        return observations, rewards, terminated, truncated, infos
+
+
+def create_env(config, seed=42):
+    grid_config = GridConfig(num_agents=config["num_agents"],
+                             size=config["size"],
+                             density=config["obstacle_density"],
+                             seed=seed,
+                             max_episode_steps=config["episode_length"],
+                             obs_radius=1,
+                             on_target="finish",
+                             render_mode=None)
+    animation_config = AnimationConfig(directory=config["renders"],  # Dónde se guardarán las imágenes
+                                       static=False,
+                                       show_agents=True,
+                                       egocentric_idx=None,  # Punto de vista
+                                       save_every_idx_episode=config["save_every"],  # Guardar cada save_every episodios
+                                       show_border=True,
+                                       show_lines=True)
+    env = pogema_v0(grid_config)
+    env = AnimationMonitor(env, animation_config=animation_config)
+    return RewardWrapper(env)  # Añadimos nuestra función de recompensa
+
+
+def build_algorithms(config, game):
+    algorithm_cls = config["algorithm_cls"]
+    solution_concept_cls = config.get("solution_concept")
+    algorithm_kwargs = dict(config.get("algorithm_kwargs", {}))
+
+    algorithms = []
+    for agent_id in range(game.num_agents):
+        kwargs = dict(algorithm_kwargs)
+        kwargs.setdefault("epsilon", config["epsilon_max"])
+        kwargs.setdefault("alpha", config["learning_rate"])
+        kwargs.setdefault("seed", agent_id)
+        if solution_concept_cls is not None:
+            kwargs.setdefault("solution_concept", solution_concept_cls())
+        algorithms.append(algorithm_cls(agent_id, game, **kwargs))
+    return algorithms
+
+
+def compute_epsilon(config, global_episode):
+    # Usamos un decay global por episodio para que el estudio de epsilon sea
+    # fácil de interpretar y comparable entre algoritmos.
+    total_episodes = config["epochs"] * config["episodes_per_epoch"]
+    progress = global_episode / max(total_episodes - 1, 1)
+    return config["epsilon_max"] - progress * (config["epsilon_max"] - config["epsilon_min"])
+
+
+
+def train_episode_no_memory(env, algorithms, game, epsilon):
+    for algorithm in algorithms:
+        algorithm.set_epsilon(epsilon)
+
+    observations, infos = env.reset()
+    terminated = [False] * game.num_agents
+    truncated = [False] * game.num_agents
+    total_rewards = [0] * game.num_agents
+    td_errors = []
+    states = [obs_to_state(observations[i]) for i in range(game.num_agents)]
+
+    while not all(terminated) and not all(truncated):
+        actions = tuple(algorithms[i].select_action(states[i]) for i in range(game.num_agents))
+        observations, rewards, terminated, truncated, infos = env.step(actions)
+        next_states = [obs_to_state(observations[i]) for i in range(game.num_agents)]
+        for i in range(game.num_agents):
+            algorithms[i].learn(actions, rewards, states[i], next_states[i])
+            td_errors.append(algorithms[i].metrics["td_error"][-1])
+        total_rewards = [total_rewards[i] + rewards[i] for i in range(game.num_agents)]
+        states = next_states
+
+    return total_rewards, td_errors
+
+
+def train_episode_with_memory(env, algorithms, game, epsilon):
+    for algorithm in algorithms:
+        algorithm.set_epsilon(epsilon)
+
+    observations, infos = env.reset()
+    terminated = [False] * game.num_agents
+    truncated = [False] * game.num_agents
+    total_rewards = [0] * game.num_agents
+    td_errors = []
+    states = [obs_to_state_with_memory(observations[i]) for i in range(game.num_agents)]
+
+    while not all(terminated) and not all(truncated):
+        actions = tuple(algorithms[i].select_action(states[i]) for i in range(game.num_agents))
+        observations, rewards, terminated, truncated, infos = env.step(actions)
+        next_states = [obs_to_state_with_memory(observations[i], actions[i]) for i in range(game.num_agents)]
+        for i in range(game.num_agents):
+            algorithms[i].learn(actions, rewards, states[i], next_states[i])
+            td_errors.append(algorithms[i].metrics["td_error"][-1])
+        total_rewards = [total_rewards[i] + rewards[i] for i in range(game.num_agents)]
+        states = next_states
+
+    return total_rewards, td_errors
+
+def train_episode(env, algorithms, game, epsilon, with_memory):
+    if (with_memory):
+        return train_episode_with_memory(env, algorithms, game, epsilon)
+    else:
+        return train_episode_no_memory(env, algorithms, game, epsilon)
+
+
+
+def evaluate_episode_no_memory(env, algorithms, game):
+    observations, infos = env.reset()
+    terminated = [False] * game.num_agents
+    truncated = [False] * game.num_agents
+    total_rewards = [0] * game.num_agents
+    states = [obs_to_state(observations[i]) for i in range(game.num_agents)]
+
+    while not all(terminated) and not all(truncated):
+        actions = tuple(algorithms[i].select_action(states[i], train=False) for i in range(game.num_agents))
+        observations, rewards, terminated, truncated, infos = env.step(actions)
+        total_rewards = [total_rewards[i] + rewards[i] for i in range(game.num_agents)]
+        states = [obs_to_state(observations[i]) for i in range(game.num_agents)]
+
+    return total_rewards
+
+def evaluate_episode_with_memory(env, algorithms, game):
+    observations, infos = env.reset()
+    terminated = [False] * game.num_agents
+    truncated = [False] * game.num_agents
+    total_rewards = [0] * game.num_agents
+    states = [obs_to_state_with_memory(observations[i]) for i in range(game.num_agents)]
+
+    while not all(terminated) and not all(truncated):
+        actions = tuple(algorithms[i].select_action(states[i], train=False) for i in range(game.num_agents))
+        observations, rewards, terminated, truncated, infos = env.step(actions)
+        total_rewards = [total_rewards[i] + rewards[i] for i in range(game.num_agents)]
+        states = [obs_to_state_with_memory(observations[i], actions[i]) for i in range(game.num_agents)]
+
+    return total_rewards
+
+def evaluate_episode(env, algorithms, game, with_memory):
+    if (with_memory):
+        return evaluate_episode_with_memory(env, algorithms, game)
+    else:
+        return evaluate_episode_no_memory(env, algorithms, game)
+    
+
+
+def run_experiment(exp_config, with_memory):
+    
+    # Creamos el directorio de renders si no existe ya.
+    os.makedirs(exp_config["renders"], exist_ok=True)
+
+    num_states = exp_config["num_states"]
+    if with_memory: num_states *= 5
+
+    # Modelo de juego y algoritmos (uno para cada agente)
+    game = GameModel(num_agents=exp_config["num_agents"], num_states=num_states,
+                        num_actions=5)  # STAY, UP, DOWN, LEFT, RIGHT
+    algorithms = build_algorithms(exp_config, game)
+
+    # Variables para almacenar métricas
+    reward_per_epoch = []
+    td_error_per_epoch = []
+
+    pbar = tqdm(range(exp_config["epochs"]))  # Barra de progreso
+    for epoch in pbar:
+        all_eval_rewards = []
+        all_td_errors = []
+
+        # Entrenamiento
+        ###############
+        for ep in range(exp_config["episodes_per_epoch"]):
+            pbar.set_postfix({'modo': 'entrenamiento', 'episodio': ep})
+            global_episode = epoch * exp_config["episodes_per_epoch"] + ep
+            epsilon = compute_epsilon(exp_config, global_episode)
+            env = create_env(config=exp_config, seed=ep % exp_config["maps"])
+            _, td_errors = train_episode(env, algorithms, game, epsilon, with_memory)
+            all_td_errors.extend(td_errors)
+        td_error_per_epoch.append(sum(all_td_errors))
+
+        # Evaluación
+        ############
+        evaluation_episodes = exp_config["maps"]
+        all_eval_rewards = []
+        for ep in range(evaluation_episodes):
+            pbar.set_postfix({'modo': 'evaluación...', 'episodio': ep})
+            env = create_env(config=exp_config, seed=ep)  # Reaprovechamos mapas del entrenamiento
+            total_rewards = evaluate_episode(env, algorithms, game, with_memory)
+            # Guardamos animaciones
+            for agent_i in range(exp_config["num_agents"]):
+                solution_concept_name = exp_config["solution_concept"].__name__ if exp_config["solution_concept"] else "NoConcept"
+                env.save_animation(f"{exp_config['renders']}/{solution_concept_name}-map{ep}-agent{agent_i}-epoch{epoch}.svg",
+                                    AnimationConfig(egocentric_idx=agent_i, show_border=True, show_lines=True))
+            all_eval_rewards.append(sum(total_rewards))
+        pbar.set_description(f"Recompensa colectiva del último epoch = {'{:>6.6}'.format(str(sum(all_eval_rewards)))}")
+        reward_per_epoch.append(sum(all_eval_rewards))
+    return reward_per_epoch, td_error_per_epoch
+
+
+def draw_comparative_history(rewards_no, rewards_mem, td_no, td_mem, plots_dir,
+                             reward_fname='compare_rewards.png', td_fname='compare_td_error.png',
+                             title_prefix=''):
+    """Draw and save comparative reward and TD-error histories.
+
+    - `plots_dir` will be created if missing.
+    - Returns tuple of saved file paths: (reward_path, td_path).
+    """
+    os.makedirs(plots_dir, exist_ok=True)
+
+    # Reward comparison
+    episodes = range(1, len(rewards_no) + 1)
+    plt.figure(figsize=(10, 6))
+    plt.plot(episodes, rewards_no, label='No memory')
+    plt.plot(episodes, rewards_mem, label='With memory')
+    plt.title(f'{title_prefix} Collective Reward - No memory vs With memory')
+    plt.xlabel('Epoch')
+    plt.ylabel('Collective Reward')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    reward_path = os.path.join(plots_dir, reward_fname)
+    plt.savefig(reward_path)
+    plt.close()
+
+    # TD-error comparison
+    episodes_td = range(1, len(td_no) + 1)
+    plt.figure(figsize=(10, 6))
+    plt.plot(episodes_td, td_no, label='TD Error - No memory')
+    plt.plot(episodes_td, td_mem, label='TD Error - With memory')
+    plt.title(f'{title_prefix} TD Error - No memory vs With memory')
+    plt.xlabel('Epoch')
+    plt.ylabel('TD Error (sum per epoch)')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    td_path = os.path.join(plots_dir, td_fname)
+    plt.savefig(td_path)
+    plt.close()
+
+    return reward_path, td_path
+
+
+def experiment_1() :
+    
+    exp_config = {
+        "num_agents": 2,  # Número de agentes
+        "size": 10,  # Tamaño del mapa (valor de anchura y valor de altura)
+        "maps": 10,  # Número de mapas a entrenar y evaluar (se repiten si episodios > mapas)
+        "num_states": 16 * 16 * 4,  # Obstacle representation x Agent representation x Target representation
+        "epochs": 1000,  # Cada epoch es un entrenamiento de un número de episodios y una evaluación
+        "episodes_per_epoch": 20,  # Número mínimo de episodios por epoch de entrenamiento
+        "episode_length": 16,  # Número máximo de pasos por episodio, se trunca si se excede
+        "obstacle_density": 0.1,  # Probabilidad de tener un obstáculo en el mapa
+        "save_every": None,  # Frecuencia con que se guarda el SVG con la animación de la ejecución
+        "learning_rate": 0.01,  # alpha
+        "epsilon_max": 1,  # epsilon inicial del entrenamiento
+        "epsilon_min": 0.1,  # cota mínima de epsilon
+        "renders": "renders/",  # directorio donde generar las animaciones
+        "algorithm_cls": JALGT,  # Aquí podéis conectar IQL u otro algoritmo.
+        "algorithm_kwargs": {},
+        "solution_concept": ParetoSolutionConcept
+    }
+
+    plots_dir = exp_config.get("plots_dir", "plots/experiment1/")
+    os.makedirs(plots_dir, exist_ok=True)
+
+    for size in [4, 6, 10]:
+        exp_config["size"] = size
+        rewards_no , td_no  = run_experiment(exp_config, with_memory=False)
+        rewards_mem, td_mem = run_experiment(exp_config, with_memory=True )
+
+        # Draw and save comparative plots
+        reward_path, td_path = draw_comparative_history(rewards_no, rewards_mem, td_no, td_mem,
+                                                        plots_dir=plots_dir,
+                                                        reward_fname= f'experiment1_rewards_{size}x{size}.png',
+                                                        td_fname=     f'experiment1_td_error_{size}x{size}.png',
+                                                        title_prefix='Experiment 1:')
+
+
+def experiment_2() :
+    
+    exp_config = {
+        "num_agents": 2,  # Número de agentes
+        "size": 6,  # Tamaño del mapa (valor de anchura y valor de altura)
+        "maps": 10,  # Número de mapas a entrenar y evaluar (se repiten si episodios > mapas)
+        "num_states": 16 * 16 * 4,  # Obstacle representation x Agent representation x Target representation
+        "epochs": 2000,  # Cada epoch es un entrenamiento de un número de episodios y una evaluación
+        "episodes_per_epoch": 10,  # Número mínimo de episodios por epoch de entrenamiento
+        "episode_length": 16,  # Número máximo de pasos por episodio, se trunca si se excede
+        "obstacle_density": 0.1,  # Probabilidad de tener un obstáculo en el mapa
+        "save_every": None,  # Frecuencia con que se guarda el SVG con la animación de la ejecución
+        "learning_rate": 0.01,  # alpha
+        "epsilon_max": 1,  # epsilon inicial del entrenamiento
+        "epsilon_min": 0.1,  # cota mínima de epsilon
+        "renders": "renders/",  # directorio donde generar las animaciones
+        "algorithm_cls": JALGT,  # Aquí podéis conectar IQL u otro algoritmo.
+        "algorithm_kwargs": {},
+        "solution_concept": ParetoSolutionConcept
+    }
+
+    plots_dir = exp_config.get("plots_dir", "plots/experiment2/")
+    os.makedirs(plots_dir, exist_ok=True)
+    SPARSE = 0.1
+    DENSE = 0.3
+    for density in [SPARSE, DENSE]:
+        exp_config["obstacle_density"] = density 
+        rewards_no , td_no  = run_experiment(exp_config, with_memory=False)
+        rewards_mem, td_mem = run_experiment(exp_config, with_memory=True )
+
+        # Draw and save comparative plots
+        reward_path, td_path = draw_comparative_history(rewards_no, rewards_mem, td_no, td_mem,
+                                                        plots_dir=plots_dir,
+                                                        reward_fname= f'experiment2_rewards_d={density}.png',
+                                                        td_fname=     f'experiment2_td_error_d={density}.png',
+                                                        title_prefix='Experiment 2:')
+
+experiment_2()
